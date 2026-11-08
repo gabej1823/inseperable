@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Inseparable",
+    "slug": "inseparable",
+    "scheme": "inseparable",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-router"],
+    "ios": { "supportsTablet": false },
+    "web": { "bundler": "metro", "name": "Inseparable" },
+    "experiments": { "typedRoutes": true }
+  }
+}
