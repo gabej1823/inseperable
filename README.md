@@ -29,3 +29,14 @@ This first commit is a **visual and interaction prototype**, not a live multipla
 The client helper is in `src/supabase.ts`. Couple creation and membership use invitation RPCs. Challenge responses and XP are handled by the `submit_challenge_response` RPC so the server awards points once, after both partners submit. Only the five beta activities in chapter one have been seeded; the remaining content, notifications, cosmetic store, and broader product QA are still pending.
 
 The working name is **Inseparable**. The GitHub repository retains its originally created spelling `inseperable`.
+
+## TestFlight from GitHub Actions
+
+Run **Actions → Build Inseparable for TestFlight → Run workflow**. No local Windows or Mac installation is needed. The workflow builds with Expo EAS and submits to TestFlight.
+
+Before the first run, add these in GitHub **Settings → Secrets and variables → Actions**:
+
+- Secrets: `EXPO_TOKEN` (Expo personal access token) and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (public project key; stored here to keep local config out of the repo).
+- Variables: `EAS_PROJECT_ID` (UUID from the new Inseparable project in Expo) and `APP_STORE_CONNECT_APP_ID` (numeric App Store Connect app ID for Inseparable).
+
+The iOS bundle identifier is `io.inseparable.app`. Create the Inseparable app record with **exactly that bundle identifier**, or adjust `app.json` before creating the record. The initial EAS iOS signing credentials and an App Store Connect API key must be configured on Expo before GitHub can perform a completely non-interactive TestFlight submission. QuantFit's existing Capacitor signing assets do not automatically transfer to this new bundle identifier.
