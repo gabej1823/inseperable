@@ -3,9 +3,15 @@ import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import { chapters, firstChapter } from '../src/content';
 import { colors } from '../src/theme';
+import { useAuth } from '../src/auth';
+import { supabase } from '../src/supabase';
+import { ActivityIndicator } from 'react-native';
 
 export default function Home() {
+  const { session, loading } = useAuth();
   const [finished, setFinished] = useState<string[]>([]);
+  if (loading) return <View style={[styles.container, { flex: 1, justifyContent: 'center' }]}><ActivityIndicator size="large" color={colors.pinkDark} /></View>;
+  if (!session) return <View style={[styles.container, { flex: 1, justifyContent: 'center' }]}><Text style={styles.title}>Welcome to Inseparable 💕</Text><Text style={styles.subtitle}>Your relationship adventure starts here.</Text><Pressable style={[styles.hero, { alignItems: 'center' }]} onPress={() => router.push('/sign-in')}><Text style={styles.heroTitle}>Create an account or sign in →</Text></Pressable></View>;
   const xp = firstChapter.filter(c => finished.includes(c.id)).reduce((sum,c) => sum + c.xp, 0);
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -28,6 +34,7 @@ export default function Home() {
         </Pressable>
       ))}
       <Text style={styles.note}>Prototype preview: partner pairing, synced answers and server-side XP are coming next. Progress shown here is illustrative.</Text>
+      <Pressable onPress={() => supabase?.auth.signOut()} style={{ padding: 14, alignItems: 'center' }}><Text style={{ color: colors.pinkDark, fontWeight: '700' }}>Sign out</Text></Pressable>
       <Text style={styles.section}>Your journey</Text>
       {chapters.map((name,i) => <View key={name} style={[styles.chapter, i > 0 && styles.locked]}><Text style={styles.chapterNumber}>{i === 0 ? '🌷' : '🔒'}</Text><Text style={styles.chapterText}>{i + 1}. {name}</Text></View>)}
     </ScrollView>
