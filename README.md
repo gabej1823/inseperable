@@ -37,6 +37,6 @@ Run **Actions → Build Inseparable for TestFlight → Run workflow**. No local 
 Before the first run, add these in GitHub **Settings → Secrets and variables → Actions**:
 
 - Secrets: `EXPO_TOKEN` (Expo personal access token) and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (public project key; stored here to keep local config out of the repo).
-- Variables: `EAS_PROJECT_ID` (UUID from the new Inseparable project in Expo) and `APP_STORE_CONNECT_APP_ID` (numeric App Store Connect app ID for Inseparable).
+- Variable: `EAS_PROJECT_ID` (UUID from the new Inseparable project in Expo).
 
-The iOS bundle identifier is `io.inseparable.app`. Create the Inseparable app record with **exactly that bundle identifier**, or adjust `app.json` before creating the record. The initial EAS iOS signing credentials and an App Store Connect API key must be configured on Expo before GitHub can perform a completely non-interactive TestFlight submission. QuantFit's existing Capacitor signing assets do not automatically transfer to this new bundle identifier.
+The iOS bundle identifier is `io.inseparable.app`, and the App Store Connect ID is `6832157326`. The initial EAS iOS signing credentials and an App Store Connect API key must be configured on Expo before GitHub can perform a completely non-interactive TestFlight submission. QuantFit's existing Capacitor signing assets do not automatically transfer to this new bundle identifier.
