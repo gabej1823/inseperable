@@ -56,8 +56,17 @@ jobs:
           node <<'NODE'
           const fs = require('node:fs');
           const app = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+          const eas = JSON.parse(fs.readFileSync('eas.json', 'utf8'));
           app.expo.extra = { ...app.expo.extra, eas: { projectId: process.env.EAS_PROJECT_ID } };
+          // EAS cloud builders do not inherit GitHub runner environment variables.
+          // These EXPO_PUBLIC_ values are intentionally client-visible in the app.
+          eas.build.production.env = {
+            ...eas.build.production.env,
+            EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
+            EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+          };
           fs.writeFileSync('app.json', JSON.stringify(app, null, 2));
+          fs.writeFileSync('eas.json', JSON.stringify(eas, null, 2));
           NODE
 
       - name: Build iPhone app and upload to TestFlight
