@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { chapters, firstChapter } from '../src/content';
 import { colors } from '../src/theme';
 import { useAuth } from '../src/auth';
@@ -10,18 +10,40 @@ import { ActivityIndicator } from 'react-native';
 export default function Home() {
   const { session, loading } = useAuth();
   const [finished, setFinished] = useState<string[]>([]);
+  const [xp, setXp] = useState(0);
+  const [chapterNumber, setChapterNumber] = useState(1);
+  const [linked, setLinked] = useState(false);
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    async function load() {
+      if (!supabase || !session) return;
+      const { data: coupleId } = await supabase.rpc('my_couple_id');
+      if (!active) return;
+      setLinked(!!coupleId);
+      if (!coupleId) { setXp(0); setFinished([]); return; }
+      const [{ data: couple }, { data: completed }] = await Promise.all([
+        supabase.from('couples').select('xp,chapter_number').eq('id', coupleId).single(),
+        supabase.from('completed_challenges').select('challenge_id').eq('couple_id', coupleId),
+      ]);
+      if (!active) return;
+      setXp(couple?.xp ?? 0);
+      setChapterNumber(couple?.chapter_number ?? 1);
+      setFinished((completed || []).map(c => c.challenge_id));
+    }
+    void load();
+    return () => { active = false; };
+  }, [session]));
   if (loading) return <View style={[styles.container, { flex: 1, justifyContent: 'center' }]}><ActivityIndicator size="large" color={colors.pinkDark} /></View>;
   if (!session) return <View style={[styles.container, { flex: 1, justifyContent: 'center' }]}><Text style={styles.title}>Welcome to Inseparable 💕</Text><Text style={styles.subtitle}>Your relationship adventure starts here.</Text><Pressable style={[styles.hero, { alignItems: 'center' }]} onPress={() => router.push('/sign-in')}><Text style={styles.heroTitle}>Create an account or sign in →</Text></Pressable></View>;
-  const xp = firstChapter.filter(c => finished.includes(c.id)).reduce((sum,c) => sum + c.xp, 0);
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.eyebrow}>YOUR SHARED ADVENTURE ♡</Text>
       <Text style={styles.title}>Better together.</Text>
       <Text style={styles.subtitle}>A little more love, one challenge at a time.</Text>
-      <Pressable style={[styles.card, { backgroundColor: colors.mint }]} onPress={() => router.push('/partner')}><Text style={styles.cardTitle}>💞 Connect with your partner</Text><Text style={styles.arrow}>›</Text></Pressable>
+      <Pressable style={[styles.card, { backgroundColor: colors.mint }]} onPress={() => router.push('/partner')}><Text style={styles.cardTitle}>{linked ? '💞 View your couple profile' : '💞 Connect with your partner'}</Text><Text style={styles.arrow}>›</Text></Pressable>
       <View style={styles.hero}>
         <Text style={styles.heroEmoji}>💕</Text>
-        <Text style={styles.heroTitle}>Chapter 1: {chapters[0]}</Text>
+        <Text style={styles.heroTitle}>Chapter {chapterNumber}: {chapters[chapterNumber - 1]}</Text>
         <Text style={styles.heroText}>{finished.length} of {firstChapter.length} starter challenges complete</Text>
         <View style={styles.track}><View style={[styles.fill, { width: `${finished.length / firstChapter.length * 100}%` }]} /></View>
         <Text style={styles.xp}>{xp} XP earned</Text>
@@ -34,10 +56,10 @@ export default function Home() {
           <Text style={styles.arrow}>›</Text>
         </Pressable>
       ))}
-      <Text style={styles.note}>Prototype preview: partner pairing, synced answers and server-side XP are coming next. Progress shown here is illustrative.</Text>
+      <Text style={styles.note}>Multiplayer test: these five challenges are the first playable chapter. More activities and chapters are in development.</Text>
       <Pressable onPress={() => supabase?.auth.signOut()} style={{ padding: 14, alignItems: 'center' }}><Text style={{ color: colors.pinkDark, fontWeight: '700' }}>Sign out</Text></Pressable>
       <Text style={styles.section}>Your journey</Text>
-      {chapters.map((name,i) => <View key={name} style={[styles.chapter, i > 0 && styles.locked]}><Text style={styles.chapterNumber}>{i === 0 ? '🌷' : '🔒'}</Text><Text style={styles.chapterText}>{i + 1}. {name}</Text></View>)}
+      {chapters.map((name,i) => <View key={name} style={[styles.chapter, i + 1 > chapterNumber && styles.locked]}><Text style={styles.chapterNumber}>{i + 1 <= chapterNumber ? '🌷' : '🔒'}</Text><Text style={styles.chapterText}>{i + 1}. {name}</Text></View>)}
     </ScrollView>
   );
 }
