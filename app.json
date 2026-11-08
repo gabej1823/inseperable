@@ -7,7 +7,11 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "plugins": ["expo-router"],
-    "ios": { "supportsTablet": false },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "io.inseparable.app",
+      "infoPlist": { "ITSAppUsesNonExemptEncryption": false }
+    },
     "web": { "bundler": "metro", "name": "Inseparable" },
     "experiments": { "typedRoutes": true }
   }
