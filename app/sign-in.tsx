@@ -4,6 +4,9 @@ import { router } from 'expo-router';
 import { supabase } from '../src/supabase';
 import { colors } from '../src/theme';
 
+// The scheme is already registered in app.json for production iOS builds.
+const EMAIL_CONFIRMATION_REDIRECT = 'inseparable://auth/callback';
+
 export default function SignIn() {
   const [creating, setCreating] = useState(true);
   const [name, setName] = useState('');
@@ -24,7 +27,10 @@ export default function SignIn() {
       if (creating) {
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(), password,
-          options: { data: { display_name: name.trim() } },
+          options: {
+            data: { display_name: name.trim() },
+            emailRedirectTo: EMAIL_CONFIRMATION_REDIRECT,
+          },
         });
         if (error) throw error;
         if (!data.session) setMessage('Check your email for a confirmation link, then sign in.');
