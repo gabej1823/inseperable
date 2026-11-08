@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "Inseparable",
-    "slug": "inseparable",
+    "slug": "inseperable",
+    "owner": "telesis",
     "scheme": "inseparable",
     "version": "0.1.0",
     "orientation": "portrait",
