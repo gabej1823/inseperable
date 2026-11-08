@@ -1,0 +1,69 @@
+name: Build Inseparable for TestFlight
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: inseparable-testflight
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and submit Inseparable
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_PUBLIC_SUPABASE_URL: https://qgvpxxbomqaxcxzzinvw.supabase.co
+      EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
+      APP_STORE_CONNECT_APP_ID: ${{ vars.APP_STORE_CONNECT_APP_ID }}
+
+    steps:
+      - name: Check required build configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$EXPO_TOKEN" || { echo "::error::Add EXPO_TOKEN to Actions secrets."; exit 1; }
+          test -n "$EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || { echo "::error::Add EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY to Actions secrets."; exit 1; }
+          test -n "$EAS_PROJECT_ID" || { echo "::error::Add EAS_PROJECT_ID to Actions variables."; exit 1; }
+          test -n "$APP_STORE_CONNECT_APP_ID" || { echo "::error::Add APP_STORE_CONNECT_APP_ID to Actions variables."; exit 1; }
+
+      - name: Download Inseparable source
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Check TypeScript
+        run: npm run check
+
+      - name: Link Expo project and App Store Connect record
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const app = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+          const eas = JSON.parse(fs.readFileSync('eas.json', 'utf8'));
+          app.expo.extra = { ...app.expo.extra, eas: { projectId: process.env.EAS_PROJECT_ID } };
+          eas.submit.production.ios.ascAppId = process.env.APP_STORE_CONNECT_APP_ID;
+          fs.writeFileSync('app.json', JSON.stringify(app, null, 2));
+          fs.writeFileSync('eas.json', JSON.stringify(eas, null, 2));
+          NODE
+
+      - name: Build iPhone app and upload to TestFlight
+        run: eas build --platform ios --profile production --non-interactive --auto-submit --wait
