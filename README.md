@@ -22,10 +22,10 @@ This first commit is a **visual and interaction prototype**, not a live multipla
 ## Supabase setup
 
 1. Create a separate Supabase project for Inseparable.
-2. Apply SQL migrations in order: `20261108_initial.sql`, `20261108_profile_trigger.sql`, `20261108_partner_linking.sql`, then `20261108_short_invite_codes.sql`. The final migration shortens new invitation codes to eight characters.
+2. Apply SQL migrations in order: `20261108_initial.sql`, `20261108_profile_trigger.sql`, `20261108_partner_linking.sql`, `20261108_short_invite_codes.sql`, then `20261108_multiplayer_challenges.sql`. The last one seeds the five beta challenges and creates secure shared-XP progression.
 3. Copy `.env.example` to `.env` and set the project URL and **publishable** client key (never a service-role or secret key).
 4. Restart Expo so `EXPO_PUBLIC_` variables are picked up.
 
-The client helper is in `src/supabase.ts`. Couple creation and membership are handled by invitation RPCs; XP and completion are still intentionally write-locked pending authenticated server-side progression rules. Do not use the prototype as a production multiplayer app yet.
+The client helper is in `src/supabase.ts`. Couple creation and membership use invitation RPCs. Challenge responses and XP are handled by the `submit_challenge_response` RPC so the server awards points once, after both partners submit. Only the five beta activities in chapter one have been seeded; the remaining content, notifications, cosmetic store, and broader product QA are still pending.
 
 The working name is **Inseparable**. The GitHub repository retains its originally created spelling `inseperable`.
