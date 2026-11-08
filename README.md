@@ -22,10 +22,10 @@ This first commit is a **visual and interaction prototype**, not a live multipla
 ## Supabase setup
 
 1. Create a separate Supabase project for Inseparable.
-2. Review `supabase/migrations/20261108_initial.sql` and apply it through the Supabase SQL Editor (or CLI migrations). It only creates new app tables and policies.
+2. Apply SQL migrations in order: `20261108_initial.sql`, `20261108_profile_trigger.sql`, then `20261108_partner_linking.sql`. The last migration adds secured invitation-code RPCs.
 3. Copy `.env.example` to `.env` and set the project URL and **publishable** client key (never a service-role or secret key).
 4. Restart Expo so `EXPO_PUBLIC_` variables are picked up.
 
-The client helper is in `src/supabase.ts`. The database is intentionally write-locked for couple creation, membership, XP and completion until the authenticated transactional functions are implemented. Do not use the prototype as a production multiplayer app yet.
+The client helper is in `src/supabase.ts`. Couple creation and membership are handled by invitation RPCs; XP and completion are still intentionally write-locked pending authenticated server-side progression rules. Do not use the prototype as a production multiplayer app yet.
 
 The working name is **Inseparable**. The GitHub repository retains its originally created spelling `inseperable`.
