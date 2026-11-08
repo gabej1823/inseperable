@@ -42,7 +42,7 @@ export default function PartnerScreen() {
 
   async function join() {
     if (!supabase) return;
-    if (!/^[a-fA-F0-9]{12}$/.test(code.trim())) { setMessage('Enter a 12-character invitation code.'); return; }
+    if (!/^([a-fA-F0-9]{8}|[a-fA-F0-9]{12})$/.test(code.trim())) { setMessage('Enter the 8-character invitation code.'); return; }
     setBusy(true); setMessage('');
     const { error } = await supabase.rpc('join_partner_with_code', { invite_code: code.trim() });
     if (error) setMessage(error.message);
@@ -66,7 +66,7 @@ export default function PartnerScreen() {
       </View>
       {!coupleId && <View style={styles.card}>
         <Text style={styles.cardTitle}>Have a code?</Text>
-        <TextInput style={styles.input} placeholder="12-character code" placeholderTextColor={colors.muted} autoCapitalize="characters" autoCorrect={false} value={code} onChangeText={setCode} maxLength={12} />
+        <TextInput style={styles.input} placeholder="8-character code" placeholderTextColor={colors.muted} autoCapitalize="characters" autoCorrect={false} value={code} onChangeText={setCode} maxLength={12} />
         <Pressable disabled={busy} style={styles.button} onPress={join}><Text style={styles.buttonText}>Link with my partner</Text></Pressable>
       </View>}
       {coupleId && <Text style={styles.lead}>Waiting for your partner to join. They should create their own account, then enter your invitation code above.</Text>}
