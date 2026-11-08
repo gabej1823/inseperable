@@ -18,6 +18,7 @@ export default function Home() {
       <Text style={styles.eyebrow}>YOUR SHARED ADVENTURE ♡</Text>
       <Text style={styles.title}>Better together.</Text>
       <Text style={styles.subtitle}>A little more love, one challenge at a time.</Text>
+      <Pressable style={[styles.card, { backgroundColor: colors.mint }]} onPress={() => router.push('/partner')}><Text style={styles.cardTitle}>💞 Connect with your partner</Text><Text style={styles.arrow}>›</Text></Pressable>
       <View style={styles.hero}>
         <Text style={styles.heroEmoji}>💕</Text>
         <Text style={styles.heroTitle}>Chapter 1: {chapters[0]}</Text>
