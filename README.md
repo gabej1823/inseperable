@@ -22,7 +22,7 @@ This first commit is a **visual and interaction prototype**, not a live multipla
 ## Supabase setup
 
 1. Create a separate Supabase project for Inseparable.
-2. Apply SQL migrations in order: `20261108_initial.sql`, `20261108_profile_trigger.sql`, then `20261108_partner_linking.sql`. The last migration adds secured invitation-code RPCs.
+2. Apply SQL migrations in order: `20261108_initial.sql`, `20261108_profile_trigger.sql`, `20261108_partner_linking.sql`, then `20261108_short_invite_codes.sql`. The final migration shortens new invitation codes to eight characters.
 3. Copy `.env.example` to `.env` and set the project URL and **publishable** client key (never a service-role or secret key).
 4. Restart Expo so `EXPO_PUBLIC_` variables are picked up.
 
