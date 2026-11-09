@@ -6,9 +6,11 @@
     "scheme": "inseparable",
     "version": "0.1.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "plugins": ["expo-router"],
     "ios": {
+      "icon": "./assets/icon.png",
       "supportsTablet": false,
       "bundleIdentifier": "io.inseparable.app",
       "infoPlist": { "ITSAppUsesNonExemptEncryption": false }

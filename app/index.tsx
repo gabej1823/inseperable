@@ -6,6 +6,8 @@ import { colors } from '../src/theme';
 import { useAuth } from '../src/auth';
 import { supabase } from '../src/supabase';
 import { ActivityIndicator } from 'react-native';
+import { AvatarPreview } from '../src/AvatarPreview';
+import { AvatarConfig, defaultAvatar, normalizeAvatar } from '../src/avatar';
 
 export default function Home() {
   const { session, loading } = useAuth();
@@ -13,10 +15,13 @@ export default function Home() {
   const [xp, setXp] = useState(0);
   const [chapterNumber, setChapterNumber] = useState(1);
   const [linked, setLinked] = useState(false);
+  const [avatar, setAvatar] = useState<AvatarConfig>(defaultAvatar);
   useFocusEffect(useCallback(() => {
     let active = true;
     async function load() {
       if (!supabase || !session) return;
+      const { data: profile } = await supabase.from('profiles').select('avatar_config').eq('id', session.user.id).single();
+      if (active) setAvatar(normalizeAvatar(profile?.avatar_config));
       const { data: coupleId } = await supabase.rpc('my_couple_id');
       if (!active) return;
       setLinked(!!coupleId);
@@ -40,6 +45,11 @@ export default function Home() {
       <Text style={styles.eyebrow}>YOUR SHARED ADVENTURE ♡</Text>
       <Text style={styles.title}>Better together.</Text>
       <Text style={styles.subtitle}>A little more love, one challenge at a time.</Text>
+      <Pressable style={styles.avatarCard} onPress={() => router.push('/avatar')}>
+        <AvatarPreview avatar={avatar} size={72} />
+        <View style={{ flex: 1, marginLeft: 15 }}><Text style={styles.cardTitle}>Your mini-me</Text><Text style={styles.cardHint}>Tap to create or edit your avatar</Text></View>
+        <Text style={styles.arrow}>›</Text>
+      </Pressable>
       <Pressable style={[styles.card, { backgroundColor: colors.mint }]} onPress={() => router.push('/partner')}><Text style={styles.cardTitle}>{linked ? '💞 View your couple profile' : '💞 Connect with your partner'}</Text><Text style={styles.arrow}>›</Text></Pressable>
       <View style={styles.hero}>
         <Text style={styles.heroEmoji}>💕</Text>
@@ -85,6 +95,7 @@ const styles = StyleSheet.create({
   cardHint: { textTransform: 'capitalize', color: colors.muted, fontSize: 12, marginTop: 4 },
   arrow: { fontSize: 30, color: colors.pinkDark },
   note: { fontSize: 12, lineHeight: 18, color: colors.muted, marginVertical: 16 },
+  avatarCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: 20, borderWidth: 1, borderColor: colors.border, padding: 12, marginBottom: 13 },
   chapter: { padding: 16, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: 16, marginBottom: 9 },
   locked: { opacity: 0.55 },
   chapterNumber: { fontSize: 18, marginRight: 12 },
