@@ -12,6 +12,7 @@ import { AvatarConfig, defaultAvatar, normalizeAvatar } from '../src/avatar';
 export default function Home() {
   const { session, loading } = useAuth();
   const [finished, setFinished] = useState<string[]>([]);
+  const [responseCounts, setResponseCounts] = useState<Record<string, number>>({});
   const [xp, setXp] = useState(0);
   const [chapterNumber, setChapterNumber] = useState(1);
   const [linked, setLinked] = useState(false);
@@ -25,15 +26,21 @@ export default function Home() {
       const { data: coupleId } = await supabase.rpc('my_couple_id');
       if (!active) return;
       setLinked(!!coupleId);
-      if (!coupleId) { setXp(0); setFinished([]); return; }
-      const [{ data: couple }, { data: completed }] = await Promise.all([
+      if (!coupleId) { setXp(0); setFinished([]); setResponseCounts({}); return; }
+      const [{ data: couple }, { data: completed }, { data: responses }] = await Promise.all([
         supabase.from('couples').select('xp,chapter_number').eq('id', coupleId).single(),
         supabase.from('completed_challenges').select('challenge_id').eq('couple_id', coupleId),
+        supabase.from('challenge_responses').select('challenge_id,user_id').eq('couple_id', coupleId),
       ]);
       if (!active) return;
       setXp(couple?.xp ?? 0);
       setChapterNumber(couple?.chapter_number ?? 1);
       setFinished((completed || []).map(c => c.challenge_id));
+      const participants: Record<string, Set<string>> = {};
+      for (const response of responses || []) {
+        (participants[response.challenge_id] ??= new Set<string>()).add(response.user_id);
+      }
+      setResponseCounts(Object.fromEntries(Object.entries(participants).map(([key, users]) => [key, users.size])));
     }
     void load();
     return () => { active = false; };
@@ -60,10 +67,11 @@ export default function Home() {
       </View>
       <Text style={styles.section}>Today's adventures</Text>
       {firstChapter.map((challenge, i) => (
-        <Pressable key={challenge.id} style={styles.card} onPress={() => router.push({ pathname: '/challenge/[id]', params: { id: challenge.id } })}>
+        <Pressable key={challenge.id} style={[styles.card, responseCounts[challenge.id] === 1 && styles.partiallyComplete, responseCounts[challenge.id] >= 2 && styles.fullyComplete]} onPress={() => router.push({ pathname: '/challenge/[id]', params: { id: challenge.id } })}>
           <View style={styles.icon}><Text style={styles.iconText}>{['💭','💌','🎁','🎲','✨'][i]}</Text></View>
           <View style={styles.cardCopy}><Text style={styles.cardTitle}>{challenge.title}</Text><Text style={styles.cardHint}>{challenge.type} · +{challenge.xp} XP</Text></View>
           <Text style={styles.arrow}>›</Text>
+          {responseCounts[challenge.id] >= 2 && <View style={styles.completedBadge}><Text style={styles.completedCheck}>✓</Text></View>}
         </Pressable>
       ))}
       <Text style={styles.note}>Multiplayer test: these five challenges are the first playable chapter. More activities and chapters are in development.</Text>
@@ -88,6 +96,10 @@ const styles = StyleSheet.create({
   xp: { color: colors.text, fontWeight: '700', marginTop: 8 },
   section: { fontFamily: 'Fredoka', fontSize: 20, color: colors.text, marginBottom: 14 },
   card: { flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: colors.surface, borderRadius: 20, marginBottom: 12, borderWidth: 1, borderColor: colors.border },
+  partiallyComplete: { backgroundColor: '#D9F2DF', borderColor: '#B6DFC2' },
+  fullyComplete: { backgroundColor: '#74C69D', borderColor: '#52A97A' },
+  completedBadge: { position: 'absolute', top: 7, right: 8, width: 23, height: 23, borderRadius: 12, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
+  completedCheck: { fontSize: 15, fontWeight: '900', color: '#328657' },
   icon: { width: 54, height: 54, borderRadius: 16, backgroundColor: colors.peach, alignItems: 'center', justifyContent: 'center', marginRight: 14 },
   iconText: { fontSize: 25 },
   cardCopy: { flex: 1 },
