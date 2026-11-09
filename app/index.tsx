@@ -67,9 +67,9 @@ export default function Home() {
         </Pressable>
       ))}
       <Text style={styles.note}>Multiplayer test: these five challenges are the first playable chapter. More activities and chapters are in development.</Text>
-      <Pressable onPress={() => supabase?.auth.signOut()} style={{ padding: 14, alignItems: 'center' }}><Text style={{ color: colors.pinkDark, fontWeight: '700' }}>Sign out</Text></Pressable>
       <Text style={styles.section}>Your journey</Text>
       {chapters.map((name,i) => <View key={name} style={[styles.chapter, i + 1 > chapterNumber && styles.locked]}><Text style={styles.chapterNumber}>{i + 1 <= chapterNumber ? '🌷' : '🔒'}</Text><Text style={styles.chapterText}>{i + 1}. {name}</Text></View>)}
+      <Pressable onPress={() => supabase?.auth.signOut()} style={styles.signOut}><Text style={{ color: colors.pinkDark, fontWeight: '700' }}>Sign out</Text></Pressable>
     </ScrollView>
   );
 }
@@ -77,21 +77,21 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: { padding: 24, paddingTop: 50, paddingBottom: 70, backgroundColor: colors.background },
   eyebrow: { fontSize: 11, letterSpacing: 2, fontWeight: '800', color: colors.pinkDark },
-  title: { fontSize: 36, fontWeight: '900', color: colors.text, marginTop: 10 },
+  title: { fontSize: 36, fontFamily: 'Fredoka', color: colors.text, marginTop: 10 },
   subtitle: { fontSize: 15, color: colors.muted, lineHeight: 23, marginTop: 6, marginBottom: 26 },
   hero: { padding: 24, borderRadius: 28, backgroundColor: colors.lavender, marginBottom: 28 },
   heroEmoji: { fontSize: 38, marginBottom: 12 },
-  heroTitle: { fontSize: 22, fontWeight: '900', color: colors.text },
+  heroTitle: { fontSize: 22, fontFamily: 'Fredoka', color: colors.text },
   heroText: { color: colors.text, marginTop: 8 },
   track: { height: 10, borderRadius: 10, backgroundColor: '#FFFFFF99', overflow: 'hidden', marginTop: 20 },
   fill: { height: '100%', backgroundColor: colors.pinkDark, borderRadius: 10 },
   xp: { color: colors.text, fontWeight: '700', marginTop: 8 },
-  section: { fontWeight: '800', fontSize: 20, color: colors.text, marginBottom: 14 },
+  section: { fontFamily: 'Fredoka', fontSize: 20, color: colors.text, marginBottom: 14 },
   card: { flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: colors.surface, borderRadius: 20, marginBottom: 12, borderWidth: 1, borderColor: colors.border },
   icon: { width: 54, height: 54, borderRadius: 16, backgroundColor: colors.peach, alignItems: 'center', justifyContent: 'center', marginRight: 14 },
   iconText: { fontSize: 25 },
   cardCopy: { flex: 1 },
-  cardTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
+  cardTitle: { fontSize: 17, fontFamily: 'Fredoka', color: colors.text },
   cardHint: { textTransform: 'capitalize', color: colors.muted, fontSize: 12, marginTop: 4 },
   arrow: { fontSize: 30, color: colors.pinkDark },
   note: { fontSize: 12, lineHeight: 18, color: colors.muted, marginVertical: 16 },
@@ -100,4 +100,5 @@ const styles = StyleSheet.create({
   locked: { opacity: 0.55 },
   chapterNumber: { fontSize: 18, marginRight: 12 },
   chapterText: { fontWeight: '700', color: colors.text },
+  signOut: { padding: 18, alignItems: 'center', marginTop: 26, borderTopWidth: 1, borderTopColor: colors.border },
 });
