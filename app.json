@@ -8,14 +8,24 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
     "ios": {
       "icon": "./assets/icon.png",
       "supportsTablet": false,
       "bundleIdentifier": "io.inseparable.app",
-      "infoPlist": { "ITSAppUsesNonExemptEncryption": false }
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
-    "web": { "bundler": "metro", "name": "Inseparable" },
-    "experiments": { "typedRoutes": true }
+    "web": {
+      "bundler": "metro",
+      "name": "Inseparable"
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

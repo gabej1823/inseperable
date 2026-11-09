@@ -67,7 +67,7 @@ export default function AvatarEditor() {
 const styles = StyleSheet.create({
   container: { padding: 24, paddingTop: 20, paddingBottom: 55, backgroundColor: colors.background, flexGrow: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  title: { fontSize: 29, fontWeight: '900', color: colors.text },
+  title: { fontSize: 29, fontFamily: 'Fredoka', color: colors.text },
   subtitle: { color: colors.muted, fontSize: 15, lineHeight: 21, marginTop: 7 },
   preview: { marginTop: 22, alignSelf: 'center', padding: 9, backgroundColor: '#fff', borderRadius: 130, borderWidth: 2, borderColor: colors.border },
   tabs: { flexDirection: 'row', gap: 7, marginTop: 26, marginBottom: 6 },
