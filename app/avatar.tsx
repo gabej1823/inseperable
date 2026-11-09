@@ -1,27 +1,15 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
-import { AvatarPreview } from '../src/AvatarPreview';
-import { AvatarConfig, avatarOptions, defaultAvatar, normalizeAvatar } from '../src/avatar';
+import { AvatarPreview, clayPortraitCount } from '../src/AvatarPreview';
+import { AvatarConfig, defaultAvatar, normalizeAvatar } from '../src/avatar';
 import { useAuth } from '../src/auth';
 import { supabase } from '../src/supabase';
 import { colors } from '../src/theme';
 
-const groups: { title: string; keys: (keyof AvatarConfig)[] }[] = [
-  { title: 'Face', keys: ['skin', 'face', 'eyes', 'brows', 'nose', 'mouth'] },
-  { title: 'Hair', keys: ['hair', 'hairColor', 'facialHair'] },
-  { title: 'Style', keys: ['glasses', 'shirt', 'shirtColor'] },
-];
-const labels: Record<keyof AvatarConfig, string> = {
-  skin: 'Skin tone', face: 'Face shape', eyes: 'Eyes', brows: 'Eyebrows', nose: 'Nose', mouth: 'Mouth',
-  hair: 'Hairstyle', hairColor: 'Hair color', facialHair: 'Facial hair', glasses: 'Glasses', shirt: 'Outfit', shirtColor: 'Clothing color',
-};
-const colorKeys = new Set(['skin', 'hairColor', 'shirtColor']);
-
 export default function AvatarEditor() {
   const { session, loading } = useAuth();
   const [avatar, setAvatar] = useState<AvatarConfig>(defaultAvatar);
-  const [section, setSection] = useState(0);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -49,37 +37,37 @@ export default function AvatarEditor() {
   if (!session) return <View style={styles.center}><Text>Sign in to create your avatar.</Text><Pressable style={styles.save} onPress={() => router.replace('/sign-in')}><Text style={styles.saveText}>Sign in</Text></Pressable></View>;
 
   return <ScrollView contentContainerStyle={styles.container}>
-    <Text style={styles.title}>Make your mini-me</Text>
-    <Text style={styles.subtitle}>Pick your features and make a character that's uniquely you.</Text>
-    <View style={styles.preview}><AvatarPreview avatar={avatar} /></View>
-    <View style={styles.tabs}>{groups.map((group, i) => <Pressable key={group.title} onPress={() => setSection(i)} style={[styles.tab, section === i && styles.activeTab]}><Text style={[styles.tabText, section === i && styles.activeTabText]}>{group.title}</Text></Pressable>)}</View>
-    {groups[section].keys.map(key => <View key={key} style={styles.group}>
-      <Text style={styles.label}>{labels[key]}</Text>
-      <View style={styles.options}>{avatarOptions[key].map((option, i) => <Pressable accessibilityRole="button" accessibilityLabel={`${labels[key]}: ${colorKeys.has(key) ? `Option ${i + 1}` : option}`} accessibilityState={{ selected: avatar[key] === i }} key={`${key}-${option}`} onPress={() => setAvatar(old => ({ ...old, [key]: i }))} style={[styles.option, avatar[key] === i && styles.selected, colorKeys.has(key) && styles.swatchFrame]}>
-        {colorKeys.has(key) ? <View style={[styles.swatch, { backgroundColor: option }]} /> : <Text style={[styles.optionText, avatar[key] === i && styles.selectedText]}>{option}</Text>}
-      </Pressable>)}</View>
-    </View>)}
+    <Text style={styles.title}>Choose your mini-me</Text>
+    <Text style={styles.subtitle}>Pick the clay character that feels most like you. You can switch your look anytime.</Text>
+    <View style={styles.preview}><AvatarPreview avatar={avatar} size={228}/></View>
+    <Text style={styles.section}>Your look</Text>
+    <View style={styles.gallery}>
+      {Array.from({ length: clayPortraitCount }, (_, preset) => (
+        <Pressable key={preset} accessibilityRole="button" accessibilityLabel={`Choose avatar ${preset + 1}`} accessibilityState={{ selected: avatar.preset === preset }} onPress={() => setAvatar(old => ({ ...old, preset }))} style={[styles.tile, avatar.preset === preset && styles.selected]}>
+          <AvatarPreview avatar={{ ...avatar, preset }} size={79}/>
+          {avatar.preset === preset && <View style={styles.check}><Text style={styles.checkText}>✓</Text></View>}
+        </Pressable>
+      ))}
+    </View>
+    <Text style={styles.note}>These are complete, coordinated clay characters so the hair, face, and lighting stay consistent. More mix-and-match features are planned.</Text>
     {!!message && <Text style={styles.error}>{message}</Text>}
-    <Pressable disabled={busy} style={[styles.save, busy && { opacity: 0.6 }]} onPress={save}><Text style={styles.saveText}>{busy ? 'Saving…' : 'Save my avatar'}</Text></Pressable>
+    <Pressable disabled={busy} style={[styles.save, busy && { opacity: .6 }]} onPress={save}><Text style={styles.saveText}>{busy ? 'Saving…' : 'Save my avatar'}</Text></Pressable>
   </ScrollView>;
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 24, paddingTop: 20, paddingBottom: 55, backgroundColor: colors.background, flexGrow: 1 },
+  container: { padding: 23, paddingTop: 20, paddingBottom: 55, backgroundColor: colors.background, flexGrow: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
   title: { fontSize: 29, fontFamily: 'Fredoka', color: colors.text },
-  subtitle: { color: colors.muted, fontSize: 15, lineHeight: 21, marginTop: 7 },
-  preview: { marginTop: 22, alignSelf: 'center', padding: 9, backgroundColor: '#fff', borderRadius: 130, borderWidth: 2, borderColor: colors.border },
-  tabs: { flexDirection: 'row', gap: 7, marginTop: 26, marginBottom: 6 },
-  tab: { flex: 1, alignItems: 'center', paddingVertical: 13, backgroundColor: colors.surface, borderRadius: 13, borderWidth: 1, borderColor: colors.border },
-  activeTab: { backgroundColor: colors.pinkDark, borderColor: colors.pinkDark },
-  tabText: { fontWeight: '800', color: colors.text }, activeTabText: { color: '#fff' },
-  group: { marginTop: 18 }, label: { fontSize: 16, fontWeight: '800', color: colors.text, marginBottom: 10 },
-  options: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 },
-  option: { borderWidth: 2, borderColor: colors.border, backgroundColor: '#fff', paddingHorizontal: 14, paddingVertical: 11, borderRadius: 14, minHeight: 44, justifyContent: 'center' },
-  selected: { borderColor: colors.pinkDark, backgroundColor: '#FFF0F5' },
-  optionText: { color: colors.text, fontWeight: '600' }, selectedText: { color: colors.pinkDark, fontWeight: '900' },
-  swatchFrame: { width: 49, height: 49, padding: 5, alignItems: 'center' }, swatch: { width: 30, height: 30, borderRadius: 15, borderWidth: 1, borderColor: '#00000018' },
-  save: { backgroundColor: colors.pinkDark, padding: 18, borderRadius: 16, alignItems: 'center', marginTop: 30 },
-  saveText: { color: 'white', fontWeight: '900', fontSize: 16 }, error: { color: '#B32646', marginTop: 16 },
+  subtitle: { color: colors.muted, fontSize: 15, lineHeight: 22, marginTop: 7 },
+  preview: { marginTop: 20, alignSelf: 'center', padding: 7, backgroundColor: '#fff', borderRadius: 130, borderWidth: 2, borderColor: colors.border },
+  section: { fontSize: 21, fontFamily: 'Fredoka', color: colors.text, marginTop: 28, marginBottom: 13 },
+  gallery: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 9 },
+  tile: { width: '31.5%', aspectRatio: 1, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: colors.border, borderRadius: 18, backgroundColor: '#fff' },
+  selected: { borderColor: colors.pinkDark, backgroundColor: '#FCEAF3' },
+  check: { position: 'absolute', top: 4, right: 5, width: 23, height: 23, borderRadius: 12, backgroundColor: colors.pinkDark, alignItems: 'center', justifyContent: 'center' },
+  checkText: { color: '#fff', fontWeight: '900' },
+  note: { fontSize: 12, color: colors.muted, lineHeight: 18, marginTop: 18 },
+  save: { backgroundColor: colors.pinkDark, padding: 18, borderRadius: 16, alignItems: 'center', marginTop: 24 },
+  saveText: { color: '#fff', fontWeight: '900', fontSize: 16 }, error: { color: '#B32646', marginTop: 16 },
 });
